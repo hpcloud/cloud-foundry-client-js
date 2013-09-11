@@ -20,6 +20,7 @@ Underscore (or lodash)
 
 1. Load the api object via an AMD module loader (requirejs example below):
 
+```
     main.js
 
     {
@@ -28,9 +29,11 @@ Underscore (or lodash)
             cf_client: 'lib/cloud-foundry-client'
         }
     }
+```
 
 2. Use the api object in your code:
 
+```
     var cf_api = new CFApi('https://api.run.pivotal.io', 'your_token');
 
     cf_api.apps.list({
@@ -53,6 +56,7 @@ Underscore (or lodash)
             }
         }
     );
+```
 
 ## Contributing
 
