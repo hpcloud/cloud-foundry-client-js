@@ -11,6 +11,16 @@ define([
     './vendor/event-emitter/event-emitter.4.0.3.min'],
     function (Apps, Services, Spaces, Organizations, HttpClient, EventEmitter) {
 
+        var default_scopes =
+            'cloud_controller.admin ' +
+                'cloud_controller.read ' +
+                'cloud_controller.write ' +
+                'openid ' +
+                'password.write ' +
+                'scim.read ' +
+                'scim.userids ' +
+                'scim.write';
+
         var api = function (api_endpoint, options) {
 
             options = options || {};
@@ -18,17 +28,14 @@ define([
             this.api_endpoint = api_endpoint;
             this.http_client = new HttpClient();
             this.token = options.token || null;
-            this.scopes = options.scopes || 'scim.write';
+            this.scopes = options.scopes || default_scopes;
             this.redirect_uri = options.redirect_uri || null;
+            this.client_id = options.client_id || 'vmc';
             this.apps = new Apps(this);
             this.services = new Services(this);
             this.spaces = new Spaces(this);
             this.organizations = new Organizations(this);
         };
-
-        // on 401 equiv
-        //  get /info
-        //  redirect to info.authorization_endpoint read%20write&redirect_uri=/test
 
         api.prototype = {
 
@@ -61,7 +68,13 @@ define([
                 this.authorizing = true;
 
                 this.get('/info', {}, function (err, res) {
-                    var oauth_url = res.body.authorization_endpoint + '/oauth/authorize?response_type=token&client_id=vmc&scope=' + self.scopes + '&redirect_uri=' + self.redirect_uri;
+
+                    var oauth_url = res.body.authorization_endpoint + '/oauth/authorize?' +
+                        'response_type=token&' +
+                        'client_id=' + self.client_id + '&' +
+                        'scope=' + self.scopes + '&' +
+                        'redirect_uri=' + self.redirect_uri;
+
                     window.location = encodeURI(oauth_url);
                 });
             },
