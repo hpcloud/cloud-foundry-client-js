@@ -6,10 +6,11 @@ define([
     './lib/apps',
     './lib/services',
     './lib/spaces',
+    './lib/users',
     './lib/organizations',
     './lib/http-client',
     './vendor/event-emitter/event-emitter.4.0.3.min'],
-    function (Apps, Services, Spaces, Organizations, HttpClient, EventEmitter) {
+    function (Apps, Services, Spaces, Users, Organizations, HttpClient, EventEmitter) {
 
         var default_scopes =
             'cloud_controller.admin ' +
@@ -32,6 +33,7 @@ define([
             this.redirect_uri = options.redirect_uri || null;
             this.client_id = options.client_id || 'vmc';
             this.apps = new Apps(this);
+            this.users = new Users(this);
             this.services = new Services(this);
             this.spaces = new Spaces(this);
             this.organizations = new Organizations(this);
@@ -88,9 +90,15 @@ define([
 
             executeRequest: function (path, options, done) {
 
+                // Allow the special case where api components may need to talk to the UAA with it's own host.
+                var prepend_host = true;
+                if (path.indexOf('http') !== -1) {
+                    prepend_host = false;
+                }
+
                 var self = this;
                 this.http_client.request(
-                    this.api_endpoint + path + (options.query ? options.query : ''),
+                    (prepend_host ? this.api_endpoint : '') + path + (options.query ? options.query : ''),
                     options,
                     function (err, res) {
                         self.processResponse(options, err, res, done);
