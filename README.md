@@ -34,6 +34,7 @@ You can patch your cloud_controller_ng by inserting the following code in line 5
 
     app.set :protection, :except => [:remote_referrer, :json_csrf]
 ```
+
 This will hopefully be fixed in the near future.
 
 
