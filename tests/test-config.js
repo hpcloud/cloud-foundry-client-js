@@ -5,13 +5,14 @@
 require.config({
     baseUrl: "./",
     paths: {
-        jquery: '../vendor/lib/jquery/jquery-1.10.1.min',
-        underscore: '../vendor/lib/underscore/underscore-1.4.4.min'
+        jquery: '../vendor/jquery/jquery-1.10.1.min',
+        underscore: '../vendor/underscore/underscore-1.4.4.min'
     }
 });
 
 require([
-    'test-api'
+    'test.apps',
+    'test.collection'
 ], function () {
     mocha.checkLeaks();
     mocha.globals(['jQuery', '_']);
