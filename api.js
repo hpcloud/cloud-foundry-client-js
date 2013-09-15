@@ -82,9 +82,10 @@ define([
             },
 
             processResponse: function (options, err, res, done) {
-                if (res.status_code === 401) {return this.authorize();} // auth check first because jquery considers 401 an error
-                if (err) {return done(err);}
+                // Prioritize our error condition checking over jqueries...
+                if (res.status_code === 401) {return this.authorize();}
                 if (options.status_code && options.status_code !== res.status_code) {return done(new Error('Status: ' + res.statusCode + '. Response: ' + res.body));}
+                if (err) {return done(err);}
                 done(null, res);
             },
 
