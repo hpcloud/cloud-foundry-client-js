@@ -84,7 +84,7 @@ define([
             processResponse: function (options, err, res, done) {
                 // Prioritize our error condition checking over jqueries...
                 if (res.status_code === 401) {return this.authorize();}
-                if (options.status_code && options.status_code !== res.status_code) {return done(new Error('Status: ' + res.statusCode + '. Response: ' + res.body));}
+                if (options.status_code && options.status_code !== res.status_code) {return done(new Error('Status: ' + res.status_code + '. Response: ' + res.body));}
                 if (err) {return done(err);}
                 done(null, res);
             },
