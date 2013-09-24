@@ -8,9 +8,8 @@ define([
     './lib/spaces',
     './lib/users',
     './lib/organizations',
-    './lib/http-client',
-    './vendor/event-emitter/event-emitter.4.0.3.min'],
-    function (Apps, Services, Spaces, Users, Organizations, HttpClient, EventEmitter) {
+    './lib/http-client'],
+    function (Apps, Services, Spaces, Users, Organizations, HttpClient) {
 
         var default_scopes =
             'cloud_controller.admin ' +
@@ -27,6 +26,7 @@ define([
             options = options || {};
 
             this.api_endpoint = api_endpoint;
+            this.authorization_endpoint = options.authorization_endpoint || null;
             this.http_client = new HttpClient();
             this.token = options.token || null;
             this.scopes = options.scopes || default_scopes;
