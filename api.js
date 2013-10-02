@@ -81,12 +81,6 @@ define([
                 });
             },
 
-            deauthorize_url: function (done) {
-                this.get('/info', {}, function (err, res) {
-                    done(res.body.authorization_endpoint + '/logout.do');
-                });
-            },
-
             processResponse: function (options, err, res, done) {
                 // Prioritize our error condition checking over jqueries...
                 if (res.status_code === 401) {return this.authorize();}
