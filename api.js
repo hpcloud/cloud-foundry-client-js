@@ -8,8 +8,9 @@ define([
     './lib/spaces',
     './lib/users',
     './lib/organizations',
+    './lib/domains',
     './lib/http-client'],
-    function (Apps, Services, Spaces, Users, Organizations, HttpClient) {
+    function (Apps, Services, Spaces, Users, Organizations, Domains, HttpClient) {
 
         var default_scopes =
             'cloud_controller.admin ' +
@@ -37,6 +38,7 @@ define([
             this.services = new Services(this);
             this.spaces = new Spaces(this);
             this.organizations = new Organizations(this);
+            this.domains = new Domains(this);
         };
 
         api.prototype = {
