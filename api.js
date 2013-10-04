@@ -12,16 +12,6 @@ define([
     './lib/http-client'],
     function (Apps, Services, Spaces, Users, Organizations, Domains, HttpClient) {
 
-        var default_scopes =
-            'cloud_controller.admin ' +
-                'cloud_controller.read ' +
-                'cloud_controller.write ' +
-                'openid ' +
-                'password.write ' +
-                'scim.read ' +
-                'scim.userids ' +
-                'scim.write';
-
         var api = function (api_endpoint, options) {
 
             options = options || {};
@@ -30,9 +20,9 @@ define([
             this.authorization_endpoint = options.authorization_endpoint || null;
             this.http_client = new HttpClient();
             this.token = options.token || null;
-            this.scopes = options.scopes || default_scopes;
+            this.scopes = options.scopes || null;
             this.redirect_uri = options.redirect_uri || null;
-            this.client_id = options.client_id || 'vmc';
+            this.client_id = options.client_id || 'cf';
             this.apps = new Apps(this);
             this.users = new Users(this);
             this.services = new Services(this);
@@ -92,8 +82,11 @@ define([
                     var oauth_url = authorization_endpoint + '/oauth/authorize?' +
                         'response_type=token&' +
                         'client_id=' + self.client_id + '&' +
-                        'scope=' + self.scopes + '&' +
                         'redirect_uri=' + self.redirect_uri;
+
+                    if (self.scopes) {
+                        oauth_url = oauth_url + '&scope=' + self.scopes;
+                    }
 
                     window.location = encodeURI(oauth_url);
                 });
