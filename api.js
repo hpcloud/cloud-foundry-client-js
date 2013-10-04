@@ -63,6 +63,22 @@ define([
                 return options;
             },
 
+            getAuthorizationEndpoint: function (done) {
+
+                var self = this;
+                if (this.authorization_endpoint) {
+                    setTimeout(function () {
+                        done(null, self.authorization_endpoint)
+                    }, 1);
+                } else {
+                    this.get('/info', {status_code: 200}, function (err, res) {
+                        if (err) {return done(err);}
+                        self.authorization_endpoint = res.body.authorization_endpoint;
+                        done(null, self.authorization_endpoint);
+                    });
+                }
+            },
+
             authorize: function () {
 
                 if (this.authorizing) {return;}
@@ -71,9 +87,9 @@ define([
                 this.token = null;
                 this.authorizing = true;
 
-                this.get('/info', {}, function (err, res) {
+                this.getAuthorizationEndpoint(function (err, authorization_endpoint) {
 
-                    var oauth_url = res.body.authorization_endpoint + '/oauth/authorize?' +
+                    var oauth_url = authorization_endpoint + '/oauth/authorize?' +
                         'response_type=token&' +
                         'client_id=' + self.client_id + '&' +
                         'scope=' + self.scopes + '&' +
