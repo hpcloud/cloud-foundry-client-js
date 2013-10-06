@@ -81,14 +81,14 @@ define([
 
                     var oauth_url = authorization_endpoint + '/oauth/authorize?' +
                         'response_type=token&' +
-                        'client_id=' + self.client_id + '&' +
-                        'redirect_uri=' + self.redirect_uri;
+                        'client_id=' + encodeURIComponent(self.client_id) + '&' +
+                        'redirect_uri=' + encodeURIComponent(self.redirect_uri);
 
                     if (self.scopes) {
-                        oauth_url = oauth_url + '&scope=' + self.scopes;
+                        oauth_url = oauth_url + '&scope=' + encodeURIComponent(self.scopes);
                     }
 
-                    window.location = encodeURI(oauth_url);
+                    window.location = oauth_url;
                 });
             },
 
