@@ -96,7 +96,7 @@ define([
                 // Prioritize our error condition checking over jqueries...
                 if (res.status_code === 401) {return this.authorize();}
                 if (options.status_code && options.status_code !== res.status_code) {return done(new Error('Status: ' + res.status_code + '. Response: ' + res.body));}
-                if (err) {return done(err);}
+                if (err) {return done(err, res);}
                 done(null, res);
             },
 
