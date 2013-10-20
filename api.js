@@ -9,8 +9,9 @@ define([
     './lib/users',
     './lib/organizations',
     './lib/domains',
+    './lib/quota-definitions',
     './lib/http-client'],
-    function (Apps, Services, Spaces, Users, Organizations, Domains, HttpClient) {
+    function (Apps, Services, Spaces, Users, Organizations, Domains, QuotaDefinitions, HttpClient) {
 
         var api = function (api_endpoint, options) {
 
@@ -29,6 +30,7 @@ define([
             this.spaces = new Spaces(this);
             this.organizations = new Organizations(this);
             this.domains = new Domains(this);
+            this.quota_definitions = new QuotaDefinitions(this);
         };
 
         api.prototype = {
