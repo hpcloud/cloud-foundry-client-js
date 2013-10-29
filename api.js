@@ -5,13 +5,14 @@
 define([
     './lib/apps',
     './lib/services',
+    './lib/service_instances',
     './lib/spaces',
     './lib/users',
     './lib/organizations',
     './lib/domains',
     './lib/quota-definitions',
     './lib/http-client'],
-    function (Apps, Services, Spaces, Users, Organizations, Domains, QuotaDefinitions, HttpClient) {
+    function (Apps, Services, ServiceInstances, Spaces, Users, Organizations, Domains, QuotaDefinitions, HttpClient) {
 
         var api = function (api_endpoint, options) {
 
@@ -27,6 +28,7 @@ define([
             this.apps = new Apps(this);
             this.users = new Users(this);
             this.services = new Services(this);
+            this.service_instances = new ServiceInstances(this);
             this.spaces = new Spaces(this);
             this.organizations = new Organizations(this);
             this.domains = new Domains(this);
