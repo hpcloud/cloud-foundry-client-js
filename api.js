@@ -5,8 +5,8 @@
 define([
     './lib/apps',
     './lib/services',
-    './lib/service_instances',
-    './lib/service_plans',
+    './lib/service-instances',
+    './lib/service-plans',
     './lib/spaces',
     './lib/users',
     './lib/organizations',
