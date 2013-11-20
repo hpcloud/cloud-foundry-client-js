@@ -116,6 +116,7 @@ define([
                 // Prioritize our error condition checking over jqueries...
                 if (res.status_code === 401 && !options.ignore_unauthorized) {return this.authorize();}
                 if (options.status_code && options.status_code !== res.status_code) {return done(new Error(makeErrorMessageFromResponse(res)), res);}
+                if (options.status_codes && options.status_codes.indexOf(res.status_code) === -1) {return done(new Error(makeErrorMessageFromResponse(res)), res);}
                 if (err) {return done(err, res);}
                 done(null, res);
             },
