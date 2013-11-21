@@ -7,13 +7,14 @@ define([
     './lib/services',
     './lib/service-instances',
     './lib/service-plans',
+    './lib/service-bindings',
     './lib/spaces',
     './lib/users',
     './lib/organizations',
     './lib/domains',
     './lib/quota-definitions',
     './lib/http-client'],
-    function (Apps, Services, ServiceInstances, ServicePlans, Spaces, Users, Organizations, Domains, QuotaDefinitions, HttpClient) {
+    function (Apps, Services, ServiceInstances, ServicePlans, ServiceBindings, Spaces, Users, Organizations, Domains, QuotaDefinitions, HttpClient) {
 
         var api = function (api_endpoint, options) {
 
@@ -31,6 +32,7 @@ define([
             this.services = new Services(this);
             this.service_instances = new ServiceInstances(this);
             this.service_plans = new ServicePlans(this);
+            this.service_bindings = new ServiceBindings(this);
             this.spaces = new Spaces(this);
             this.organizations = new Organizations(this);
             this.domains = new Domains(this);
