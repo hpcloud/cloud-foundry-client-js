@@ -12,9 +12,10 @@ define([
     './lib/users',
     './lib/organizations',
     './lib/domains',
+    './lib/routes',
     './lib/quota-definitions',
     './lib/http-client'],
-    function (Apps, Services, ServiceInstances, ServicePlans, ServiceBindings, Spaces, Users, Organizations, Domains, QuotaDefinitions, HttpClient) {
+    function (Apps, Services, ServiceInstances, ServicePlans, ServiceBindings, Spaces, Users, Organizations, Domains, Routes, QuotaDefinitions, HttpClient) {
 
         var api = function (api_endpoint, options) {
 
@@ -36,6 +37,7 @@ define([
             this.spaces = new Spaces(this);
             this.organizations = new Organizations(this);
             this.domains = new Domains(this);
+            this.routes = new Routes(this);
             this.quota_definitions = new QuotaDefinitions(this);
         };
 
