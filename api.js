@@ -143,6 +143,13 @@ define([
                 );
             },
 
+            getApiInfo: function (done) {
+
+                this.get('/v2/info', {status_code: 200}, function (err, res) {
+                    done(err, res ? res.body : null);
+                });
+            },
+
             get: function (path, options, done) {
 
                 options = this.normalizeOptions(options);
