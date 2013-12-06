@@ -39,6 +39,8 @@ define([
             this.domains = new Domains(this);
             this.routes = new Routes(this);
             this.quota_definitions = new QuotaDefinitions(this);
+
+            this.initialize();
         };
 
         var makeErrorMessageFromResponse = function (res) {
@@ -56,6 +58,10 @@ define([
         };
 
         api.prototype = {
+
+            initialize: function () {
+                /* faux-constructor to use an extension point for derived clients */
+            },
 
             makeAuthorizationHeader: function () {
                 return 'bearer ' + this.token;
