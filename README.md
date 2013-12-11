@@ -3,7 +3,7 @@
 A JavaScript based Cloud Foundry Api client targeting the v2 api.
 
 The client is intended to be used by client-side JavaScript apps (such as those using Backbone, Knockout and Angular etc.)
-and will evolve with that intention in mind.
+and will evolve with that in mind.
 
 
 ## Status
@@ -14,29 +14,37 @@ covering the entire Cloud Foundry Api but initially functionality will be added 
 
 ## Dependencies
 
-RequireJS (or AMD compatible loader)
-jQuery
-Underscore (or lodash)
+* RequireJS (or AMD compatible loader)
+* jQuery
+* Underscore (or lodash)
 
+Dependencies are bundled in the ```/vendor``` directory.
 
-## Issues
+## Notes About Cross Domain Requests
 
-Cloud Foundry mainline will throw a 500 internal server error when any API call is made with mismatched host and
-referrer headers, which makes it impossible to run cross domain clients like this from the browser.
+Cloud Foundry v2 doesn't support cross domain requests out of the box. Until it does then there are a few ways to work
+around it:
 
-You can patch your cloud_controller_ng by inserting the following code in line 50 of cloud_controller_ng/lib/sinatra/vcap.rb:
+ 1. Run your browser with cross domain security disabled (not recommended outside of development). In Chrome this can be
+ achieved with the --disable-web-security flag.
 
-```
-    # Allow browser based clients to talk to the CC Api across domains
-    # This is not a full cross domain solution but it prevents Sinatra throwing a 500 error
-    # when referrer and host headers do not match.
-    # See https://github.com/sinatra/sinatra/issues/747
+  If you do this you'll notice that Cloud Foundry will throw a 500 internal server error when any API call is made with
+  mismatched host and referrer headers, which makes it impossible to run cross domain requests (even if the browser
+  allows them).
 
-    app.set :protection, :except => [:remote_referrer, :json_csrf]
-```
+  You can patch your ```cloud_controller_ng``` by inserting the following code in ```line 50``` of ```cloud_controller_ng/lib/sinatra/vcap.rb```:
 
-This will hopefully be fixed in the near future.
+  ```
+  # Allow browser based clients to talk to the CC Api across domains
+  # This is not a full cross domain solution but it prevents Sinatra throwing a 500 error
+  # when referrer and host headers do not match.
+  # See https://github.com/sinatra/sinatra/issues/747
 
+  app.set :protection, :except => [:remote_referrer, :json_csrf]
+  
+  ```
+
+2. Use a reverse proxy to avoid cross domain requests all together.
 
 ## Tests
 
@@ -50,8 +58,7 @@ This will hopefully be fixed in the near future.
 ## Usage
 
 1. Load the api object via an AMD module loader (requirejs example below):
-
-```
+    ```
     main.js
 
     {
@@ -63,41 +70,40 @@ This will hopefully be fixed in the near future.
 ```
 
 2. Use the api object in your code - note you are responsible for providing the token as well as providing a page to redirect to
-that is capable of pulling the token from the url (this is your opportunity to persist it):
+that is capable of pulling the token from the url (see ```/examples/oauth.html```): 
 
-```
-define([
-    'cloud-foundry-client/api'],
-    function(CFApi){
+    ```
+    define([
+        'cloud-foundry-client/api'],
+        function(CFApi){
 
-        var cf_api = new CFApi(api_endpoint, {
-            token: Utils.getCookie('cf_token'),
-            redirect_uri: html_root + 'oauth.html'
-            });
+            var cf_api = new CFApi(api_endpoint, {
+                token: Utils.getCookie('cf_token'),
+                redirect_uri: html_root + 'oauth.html'
+               });
 
-        cf_api.apps.list({
-                    paging: {
-                        'results-per-page': 1
-                    },
-                    filter: {
-                        name: "instances",
-                        value: ">1"
-                    }},
-                function (err, page) {
-                    if (err) {return console.log(err);}
+            cf_api.apps.list({
+                        paging: {
+                            'results-per-page': 1
+                        },
+                        filter: {
+                            name: "instances",
+                           value: ">1"
+                       }},
+                    function (err, page) {
+                       if (err) {return console.log(err);}
 
-                    console.log(page.data);
+                        console.log(page.data);
 
-                    if (page.hasNextPage()) {
-                        page.getNextPage(function (err, next_page) {
-                            ...
-                        });
+                        if (page.hasNextPage()) {
+                            page.getNextPage(function (err, next_page) {
+                                ...
+                           });
+                       }
                     }
-                }
-            );
-});
-
-```
+               );
+    });
+    ```
 
 ## Contributing
 

@@ -54,7 +54,7 @@ define([
                 });
 
                 it('should return a resource', function (done) {
-                    collection.get(TestData.app_get.metadata.guid, function (err, resource) {
+                    collection.get(TestData.app_get.metadata.guid, {}, function (err, resource) {
                         if (err) {return done(err);}
                         expect(resource.metadata).to.be.ok();
                         expect(resource.entity).to.be.ok();

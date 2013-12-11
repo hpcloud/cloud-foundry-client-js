@@ -60,7 +60,7 @@ define([
         api.prototype = {
 
             initialize: function () {
-                /* faux-constructor to use an extension point for derived clients */
+                /* faux-constructor to use as an extension point for derived clients */
             },
 
             makeAuthorizationHeader: function () {
