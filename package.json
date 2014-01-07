@@ -1,0 +1,31 @@
+{
+    "name": "cloud-foundry",
+    "description": "A Cloud Foundry api client that is compatible with the Cloud Foundry v2 api.",
+    "version": "0.0.1",
+    "homepage": "https://github.com/ActiveState/cloud-foundry-client-js",
+    "author": "Tyler Power <tylerpowerx@gmail.com> (https://github.com/Diggs)",
+    "licenses": [
+        {
+            "type": "MIT",
+            "url": "https://github.com/ActiveState/cloud-foundry-client-js/blob/master/LICENSE.md"
+        }
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ActiveState/cloud-foundry-client-js.git"
+    },
+    "dependencies": {
+        "amdefine": ">=0.1.0",
+        "underscore": "1.5.2",
+        "request": "2.30.0",
+        "mocha": "1.16.2",
+        "expect.js": "0.2.0"
+    },
+    "main": "./api.js",
+    "scripts": {
+        "test": "find ./ -name 'test.*.js' | grep -v node_modules | xargs mocha -R spec"
+    },
+    "engines": {
+        "node": ">=0.4.2"
+    }
+}

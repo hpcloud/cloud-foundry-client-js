@@ -2,6 +2,8 @@
  * Copyright (c) ActiveState 2013 - ALL RIGHTS RESERVED.
  */
 
+if (typeof define !== 'function') { var define = require('amdefine')(module) }
+
 define([],
     function () {
 
@@ -14,7 +16,7 @@ define([],
             stubExecuteRequest: function (cf_api, response_data) {
                 cf_api.executeRequest = function (path, options, done) {
                     setTimeout(function () {
-                        done(null, {body:response_data});
+                        done(null, {body: response_data});
                     }, 10);
                 };
             }

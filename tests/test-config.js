@@ -6,7 +6,8 @@ require.config({
     baseUrl: "./",
     paths: {
         jquery: '../vendor/jquery/jquery-1.10.1.min',
-        underscore: '../vendor/underscore/underscore-1.4.4.min'
+        underscore: '../vendor/underscore/underscore-1.4.4.min',
+        'expectjs': '../vendor/mocha/expect'
     }
 });
 
