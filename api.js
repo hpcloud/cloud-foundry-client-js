@@ -101,7 +101,7 @@ define([
                 }
             },
 
-            authorize: function () {
+            authorizeBrowser: function () {
 
                 if (this.authorizing) {return;}
 
@@ -124,12 +124,24 @@ define([
                 });
             },
 
+            authorizeNodejs: function (res, done) {
+
+                /**
+                 * 1. If acting on behalf of a user e.g. just passing through a user token then a 401 is an error that should bubble out to the user
+                 * 2. If acting as a resource server a 401 should trigger a refresh token attempt and failing that it should try to re-authenticate using client credentials
+                 *
+                 * Assume 1. for now until 2. is implemented. Users of this lib could override this function to patch in their desired behaviour.
+                 */
+
+                done(new Error(makeErrorMessageFromResponse(res)), res);
+            },
+
             processResponse: function (options, err, res, done) {
-                // Prioritize our error condition checking over jqueries...
-                if (res.status_code === 401 && !options.ignore_unauthorized) {return this.authorize();}
+                if (err) {return done(err, res);}
+                if (res.status_code === 401 && !options.ignore_unauthorized && typeof window !== 'undefined') {return this.authorizeBrowser();}
+                if (res.status_code === 401 && !options.ignore_unauthorized && typeof window === 'undefined') {return this.authorizeNodejs(res, done);}
                 if (options.status_code && options.status_code !== res.status_code) {return done(new Error(makeErrorMessageFromResponse(res)), res);}
                 if (options.status_codes && options.status_codes.indexOf(res.status_code) === -1) {return done(new Error(makeErrorMessageFromResponse(res)), res);}
-                if (err) {return done(err, res);}
                 done(null, res);
             },
 

@@ -2,23 +2,29 @@
 
 A JavaScript based Cloud Foundry Api client targeting the v2 api.
 
-The client is intended to be used by client-side JavaScript apps (such as those using Backbone, Knockout and Angular etc.)
-and will evolve with that in mind.
-
+This client support running in the browser via an AMD compatible loader (such as requirejs) and on the server under Node.js
 
 ## Status
 
 The client is under heavy development so expect some issues. It would be great to see it evolve in to a comprehensive client
 covering the entire Cloud Foundry Api but initially functionality will be added in the order that we need it for in other projects.
 
-
 ## Dependencies
+
+### Browser Dependencies
 
 * RequireJS (or AMD compatible loader)
 * jQuery
 * Underscore (or lodash)
 
-Dependencies are bundled in the ```/vendor``` directory.
+Browser dependencies are bundled in the ```/vendor``` directory.
+
+### Node.js Dependencies
+
+* Request
+* Underscore (or lodash)
+
+Node.js dependencies are pulled in via NPM
 
 ## Notes About Cross Domain Requests
 
@@ -48,14 +54,17 @@ around it:
 
 ## Tests
 
-0. Modify api_endpoint and api_token properties of tests/test-config.js (won't be necessary for much longer)
+### Browser Tests
 
-1. Open Chrome with '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --disable-web-security'
+Open ```tests/test.html```
 
-2. Open tests/test.html to run tests.
+### Node.js Tests
 
+Run ```npm run-script test```
 
 ## Usage
+
+### Browser Usage
 
 1. Load the api object via an AMD module loader (requirejs example below):
     ```
@@ -88,7 +97,7 @@ that is capable of pulling the token from the url (see ```/examples/oauth.html``
                         },
                         filter: {
                             name: "instances",
-                           value: ">1"
+                            value: ">1"
                        }},
                     function (err, page) {
                        if (err) {return console.log(err);}
@@ -104,6 +113,49 @@ that is capable of pulling the token from the url (see ```/examples/oauth.html``
                );
     });
     ```
+### Node.js Usage
+
+1. ```npm install cloud-foundry``` (or add 'cloud-foundry' as a dependency in your package.json)
+
+2. Use the api object in your code - note that authentication isn't yet supported for Node.js so an expired/invalid token
+will bubble out as an error. We would like to add support for refresh tokens and authentication via client credentials
+at some stage:
+
+ ```
+ var CloudFoundryApi = require('cloud-foundry');
+
+ var cf_api = new CloudFoundryApi(api_endpoint, {token: 'foobar'});
+
+ cf_api.apps.list({
+            paging: {
+                'results-per-page': 1
+            },
+            filter: {
+                name: "instances",
+                value: ">1"
+           }},
+        function (err, page) {
+           if (err) {return console.log(err);}
+
+            console.log(page.data);
+
+            if (page.hasNextPage()) {
+                page.getNextPage(function (err, next_page) {
+                    ...
+               });
+           }
+        }
+   );
+
+ ```
+
+## TODO:
+
+1. Better test coverage
+
+2. Implement support for refresh tokens
+
+3. Implement authentication via client credentials (for resource servers) when running under Node.js
 
 ## Contributing
 
