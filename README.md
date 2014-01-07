@@ -2,7 +2,7 @@
 
 A JavaScript based Cloud Foundry Api client targeting the v2 api.
 
-This client support running in the browser via an AMD compatible loader (such as requirejs) and on the server under Node.js
+This client supports running in the browser via an AMD compatible loader (such as requirejs) and on the server under Node.js
 
 ## Status
 
