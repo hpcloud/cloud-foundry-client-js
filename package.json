@@ -1,7 +1,7 @@
 {
     "name": "cloud-foundry",
     "description": "A Cloud Foundry api client that is compatible with the Cloud Foundry v2 api.",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "homepage": "https://github.com/ActiveState/cloud-foundry-client-js",
     "author": "Tyler Power <tylerpowerx@gmail.com> (https://github.com/Diggs)",
     "licenses": [
