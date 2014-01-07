@@ -113,6 +113,7 @@ that is capable of pulling the token from the url (see ```/examples/oauth.html``
                );
     });
     ```
+
 ### Node.js Usage
 
 1. ```npm install cloud-foundry``` (or add 'cloud-foundry' as a dependency in your package.json)

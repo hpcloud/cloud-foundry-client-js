@@ -101,6 +101,14 @@ define([
                 }
             },
 
+            authorize: function () {
+                if (typeof window !== 'undefined') {
+                    this.authorizeBrowser();
+                } else {
+                    this.authorizeNodejs();
+                }
+            },
+
             authorizeBrowser: function () {
 
                 if (this.authorizing) {return;}
@@ -132,8 +140,9 @@ define([
                  *
                  * Assume 1. for now until 2. is implemented. Users of this lib could override this function to patch in their desired behaviour.
                  */
-
-                done(new Error(makeErrorMessageFromResponse(res)), res);
+                if (done) {
+                    done(new Error(makeErrorMessageFromResponse(res)), res);
+                }
             },
 
             processResponse: function (options, err, res, done) {
