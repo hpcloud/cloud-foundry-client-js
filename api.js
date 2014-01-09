@@ -184,6 +184,10 @@ define([
                 options = this.normalizeOptions(options);
                 options.verb = 'GET';
 
+                if (!options.status_code && !options.status_codes) {
+                    options.status_code = 200;
+                }
+
                 this.executeRequest(path, options, done);
             },
 
@@ -191,6 +195,10 @@ define([
 
                 options = this.normalizeOptions(options);
                 options.verb = 'DELETE';
+
+                if (!options.status_code && !options.status_codes) {
+                    options.status_code = 200;
+                }
 
                 this.executeRequest(path, options, done);
             },
@@ -200,6 +208,12 @@ define([
                 options = this.normalizeOptions(options);
                 options.verb = 'PUT';
 
+
+                if (!options.status_code && !options.status_codes) {
+                    options.status_code = 200;
+                }
+
+
                 this.executeRequest(path, options, done);
             },
 
@@ -207,6 +221,10 @@ define([
 
                 options = this.normalizeOptions(options);
                 options.verb = 'POST';
+
+                if (!options.status_code && !options.status_codes) {
+                    options.status_code = 201;
+                }
 
                 this.executeRequest(path, options, done);
             }
