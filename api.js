@@ -151,7 +151,15 @@ define([
                 if (res.status_code === 401 && !options.ignore_unauthorized && typeof window === 'undefined') {return this.authorizeNodejs(res, done);}
                 if (options.status_code && options.status_code !== res.status_code) {return done(new Error(makeErrorMessageFromResponse(res)), res);}
                 if (options.status_codes && options.status_codes.indexOf(res.status_code) === -1) {return done(new Error(makeErrorMessageFromResponse(res)), res);}
-                done(null, res);
+                this.marshalResponse(options, res, done);
+            },
+
+            marshalResponse: function (options, res, done) {
+                /* this is effectively a no-op implementation. derived clients can use it to modify the response. */
+                var self = this;
+                setTimeout(function () {
+                    done.call(self, null, res);
+                }, 1);
             },
 
             executeRequest: function (path, options, done) {
@@ -208,11 +216,9 @@ define([
                 options = this.normalizeOptions(options);
                 options.verb = 'PUT';
 
-
                 if (!options.status_code && !options.status_codes) {
                     options.status_code = 200;
                 }
-
 
                 this.executeRequest(path, options, done);
             },
