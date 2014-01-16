@@ -162,6 +162,14 @@ define([
                 }, 1);
             },
 
+            marshalRequest: function (url, options, done) {
+                /* this is effectively a no-op implementation. derived clients can use it to modify the request. */
+                var self = this;
+                setTimeout(function () {
+                    done.call(self, null, url, options);
+                }, 1);
+            },
+
             executeRequest: function (path, options, done) {
 
                 // Allow the special case where api components may need to talk to the UAA with it's own host.
@@ -171,13 +179,17 @@ define([
                 }
 
                 var self = this;
-                this.http_client.request(
-                    (prepend_host ? this.api_endpoint : '') + path + (options.query ? options.query : ''),
-                    options,
-                    function (err, res) {
-                        self.processResponse(options, err, res, done);
-                    }
-                );
+                this.marshalRequest(path, options, function (err, path, options) {
+                    if (err) {return done(err);}
+
+                    self.http_client.request(
+                        (prepend_host ? self.api_endpoint : '') + path + (options.query ? options.query : ''),
+                        options,
+                        function (err, res) {
+                            self.processResponse(options, err, res, done);
+                        }
+                    );
+                });
             },
 
             getApiInfo: function (done) {
