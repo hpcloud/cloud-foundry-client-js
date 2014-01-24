@@ -153,7 +153,7 @@ define([
 
         api.prototype.triggerGlobalError = function (err, options, res) {
             if (options.global) {
-                this.emit('http_error', err, res);
+                this.emit('http_error', err, res, options);
             }
         };
 
@@ -229,6 +229,7 @@ define([
 
             options = this.normalizeOptions(options);
             options.verb = 'GET';
+            options.path = path;
 
             if (!options.status_code && !options.status_codes) {
                 options.status_code = 200;
@@ -241,6 +242,7 @@ define([
 
             options = this.normalizeOptions(options);
             options.verb = 'DELETE';
+            options.path = path;
 
             if (!options.status_code && !options.status_codes) {
                 options.status_code = 200;
@@ -253,6 +255,7 @@ define([
 
             options = this.normalizeOptions(options);
             options.verb = 'PUT';
+            options.path = path;
 
             if (!options.status_code && !options.status_codes) {
                 options.status_code = 200;
@@ -265,6 +268,7 @@ define([
 
             options = this.normalizeOptions(options);
             options.verb = 'POST';
+            options.path = path;
 
             if (!options.status_code && !options.status_codes) {
                 options.status_code = 201;

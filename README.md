@@ -2,12 +2,14 @@
 
 A JavaScript based Cloud Foundry Api client targeting the v2 api.
 
-This client supports running in the browser via an AMD compatible loader (such as requirejs) and on the server under Node.js
+This client supports running in the browser via an AMD compatible loader (such as requirejs) and on the server under
+Node.js
 
 ## Status
 
-The client is under heavy development so expect some issues. It would be great to see it evolve in to a comprehensive client
-covering the entire Cloud Foundry Api but initially functionality will be added in the order that we need it for in other projects.
+The client is under heavy development so expect some issues. It would be great to see it evolve in to a comprehensive
+client covering the entire Cloud Foundry Api but initially functionality will be added in the order that we need it for
+in other projects.
 
 ## Dependencies
 
@@ -51,7 +53,8 @@ around it:
   mismatched host and referrer headers, which makes it impossible to run cross domain requests (even if the browser
   allows them).
 
-  You can patch your ```cloud_controller_ng``` by inserting the following code in ```line 50``` of ```cloud_controller_ng/lib/sinatra/vcap.rb```:
+  You can patch your ```cloud_controller_ng``` by inserting the following code in ```line 50``` of
+  ```cloud_controller_ng/lib/sinatra/vcap.rb```:
 
   ```
   # Allow browser based clients to talk to the CC Api across domains
@@ -91,8 +94,8 @@ Run ```npm run-script test```
     }
 ```
 
-2. Use the api object in your code - note you are responsible for providing the token as well as providing a page to redirect to
-that is capable of pulling the token from the url (see ```/examples/oauth.html```): 
+2. Use the api object in your code - note you are responsible for providing the token as well as providing a page to
+redirect to that is capable of pulling the token from the url (see ```/examples/oauth.html```):
 
     ```
     define([
