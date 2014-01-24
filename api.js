@@ -5,6 +5,7 @@
 if (typeof define !== 'function') { var define = require('amdefine')(module) }
 
 define([
+    typeof window === 'undefined' ? 'events' : 'event-emitter',
     './lib/apps',
     './lib/services',
     './lib/service-instances',
@@ -17,7 +18,7 @@ define([
     './lib/routes',
     './lib/quota-definitions',
     './lib/http-client'],
-    function (Apps, Services, ServiceInstances, ServicePlans, ServiceBindings, Spaces, Users, Organizations, Domains, Routes, QuotaDefinitions, HttpClient) {
+    function (Events, Apps, Services, ServiceInstances, ServicePlans, ServiceBindings, Spaces, Users, Organizations, Domains, Routes, QuotaDefinitions, HttpClient) {
 
         var api = function (api_endpoint, options) {
 
@@ -45,6 +46,12 @@ define([
             this.initialize();
         };
 
+        if (typeof window === 'undefined') {
+            api.prototype.__proto__ = Events.EventEmitter.prototype;
+        } else {
+            api.prototype = Object.create(new Events());
+        }
+
         var makeErrorMessageFromResponse = function (res) {
 
             var response_body = res.body;
@@ -59,211 +66,211 @@ define([
             return 'Status: ' + res.status_code + '. Response: ' + response_body;
         };
 
-        api.prototype = {
+        api.prototype.initialize = function () {
+            /* faux-constructor to use as an extension point for derived clients */
+        };
 
-            initialize: function () {
-                /* faux-constructor to use as an extension point for derived clients */
-            },
+        api.prototype.makeAuthorizationHeader = function () {
+            return 'bearer ' + this.token;
+        };
 
-            makeAuthorizationHeader: function () {
-                return 'bearer ' + this.token;
-            },
+        api.prototype.addAuthorizationHeaderToOptions = function (options) {
+            options.headers['Authorization'] = this.makeAuthorizationHeader();
+        };
 
-            addAuthorizationHeaderToOptions: function (options) {
-                options.headers['Authorization'] = this.makeAuthorizationHeader();
-            },
+        api.prototype.normalizeOptions = function (options) {
 
-            normalizeOptions: function (options) {
+            options = options || {};
+            options.headers = options.headers || {};
+            options.global = typeof options.global === 'undefined' ? true : options.global;
 
-                options = options || {};
-                options.headers = options.headers || {};
-                options.global = typeof options.global === 'undefined' ? true : options.global;
-
-                if (this.token) {
-                    this.addAuthorizationHeaderToOptions(options);
-                }
-
-                return options;
-            },
-
-            getAuthorizationEndpoint: function (done) {
-
-                var self = this;
-                if (this.authorization_endpoint) {
-                    setTimeout(function () {
-                        done(null, self.authorization_endpoint)
-                    }, 1);
-                } else {
-                    this.get('/info', {status_code: 200}, function (err, res) {
-                        if (err) {return done(err);}
-                        self.authorization_endpoint = res.body.authorization_endpoint;
-                        done(null, self.authorization_endpoint);
-                    });
-                }
-            },
-
-            authorize: function () {
-                if (typeof window !== 'undefined') {
-                    this.authorizeBrowser();
-                } else {
-                    this.authorizeNodejs();
-                }
-            },
-
-            authorizeBrowser: function () {
-
-                if (this.authorizing) {return;}
-
-                var self = this;
-                this.token = null;
-                this.authorizing = true;
-
-                this.getAuthorizationEndpoint(function (err, authorization_endpoint) {
-
-                    var oauth_url = authorization_endpoint + '/oauth/authorize?' +
-                        'response_type=token&' +
-                        'client_id=' + encodeURIComponent(self.client_id) + '&' +
-                        'redirect_uri=' + encodeURIComponent(self.redirect_uri);
-
-                    if (self.scopes) {
-                        oauth_url = oauth_url + '&scope=' + encodeURIComponent(self.scopes);
-                    }
-
-                    window.location = oauth_url;
-                });
-            },
-
-            authorizeNodejs: function (res, done) {
-
-                /**
-                 * 1. If acting on behalf of a user e.g. just passing through a user token then a 401 is an error that should bubble out to the user
-                 * 2. If acting as a resource server a 401 should trigger a refresh token attempt and failing that it should try to re-authenticate using client credentials
-                 *
-                 * Assume 1. for now until 2. is implemented. Users of this lib could override this function to patch in their desired behaviour.
-                 */
-                if (done) {
-                    done(new Error(makeErrorMessageFromResponse(res)), res);
-                }
-            },
-
-            triggerGlobalError: function (err, options, res) {
-
-                if (options.global) {
-                    // TODO trigger global err event
-                }
-            },
-
-            processResponse: function (options, err, res, done) {
-
-                if (err) {return done(err, res);}
-                if (res.status_code === 401 && !options.ignore_unauthorized && typeof window !== 'undefined') {return this.authorizeBrowser();}
-                if (res.status_code === 401 && !options.ignore_unauthorized && typeof window === 'undefined') {return this.authorizeNodejs(res, done);}
-
-                if (options.status_code && options.status_code !== res.status_code) {
-                    this.triggerGlobalError();
-                    return done(new Error(makeErrorMessageFromResponse(res)), res);
-                }
-
-                if (options.status_codes && options.status_codes.indexOf(res.status_code) === -1) {
-                    this.triggerGlobalError();
-                    return done(new Error(makeErrorMessageFromResponse(res)), res);
-                }
-
-                this.marshalResponse(options, res, done);
-            },
-
-            marshalResponse: function (options, res, done) {
-                /* this is effectively a no-op implementation. derived clients can use it to modify the response. */
-                var self = this;
-                setTimeout(function () {
-                    done.call(self, null, res);
-                }, 1);
-            },
-
-            marshalRequest: function (url, options, done) {
-                /* this is effectively a no-op implementation. derived clients can use it to modify the request. */
-                var self = this;
-                setTimeout(function () {
-                    done.call(self, null, url, options);
-                }, 1);
-            },
-
-            executeRequest: function (path, options, done) {
-
-                // Allow the special case where api components may need to talk to the UAA with it's own host.
-                var prepend_host = true;
-                if (path.indexOf('http') !== -1) {
-                    prepend_host = false;
-                }
-
-                var self = this;
-                this.marshalRequest(path, options, function (err, path, options) {
-                    if (err) {return done(err);}
-
-                    self.http_client.request(
-                        (prepend_host ? self.api_endpoint : '') + path + (options.query ? options.query : ''),
-                        options,
-                        function (err, res) {
-                            self.processResponse(options, err, res, done);
-                        }
-                    );
-                });
-            },
-
-            getApiInfo: function (done) {
-
-                this.get('/v2/info', {status_code: 200}, function (err, res) {
-                    done(err, res ? res.body : null);
-                });
-            },
-
-            get: function (path, options, done) {
-
-                options = this.normalizeOptions(options);
-                options.verb = 'GET';
-
-                if (!options.status_code && !options.status_codes) {
-                    options.status_code = 200;
-                }
-
-                this.executeRequest(path, options, done);
-            },
-
-            delete_: function (path, options, done) {
-
-                options = this.normalizeOptions(options);
-                options.verb = 'DELETE';
-
-                if (!options.status_code && !options.status_codes) {
-                    options.status_code = 200;
-                }
-
-                this.executeRequest(path, options, done);
-            },
-
-            put: function (path, options, done) {
-
-                options = this.normalizeOptions(options);
-                options.verb = 'PUT';
-
-                if (!options.status_code && !options.status_codes) {
-                    options.status_code = 200;
-                }
-
-                this.executeRequest(path, options, done);
-            },
-
-            post: function (path, options, done) {
-
-                options = this.normalizeOptions(options);
-                options.verb = 'POST';
-
-                if (!options.status_code && !options.status_codes) {
-                    options.status_code = 201;
-                }
-
-                this.executeRequest(path, options, done);
+            if (this.token) {
+                this.addAuthorizationHeaderToOptions(options);
             }
+
+            return options;
+        };
+
+        api.prototype.getAuthorizationEndpoint = function (done) {
+
+            var self = this;
+            if (this.authorization_endpoint) {
+                setTimeout(function () {
+                    done(null, self.authorization_endpoint)
+                }, 1);
+            } else {
+                this.get('/info', {status_code: 200}, function (err, res) {
+                    if (err) {return done(err);}
+                    self.authorization_endpoint = res.body.authorization_endpoint;
+                    done(null, self.authorization_endpoint);
+                });
+            }
+        };
+
+        api.prototype.authorize = function () {
+            if (typeof window !== 'undefined') {
+                this.authorizeBrowser();
+            } else {
+                this.authorizeNodejs();
+            }
+        };
+
+        api.prototype.authorizeBrowser = function () {
+
+            if (this.authorizing) {return;}
+
+            var self = this;
+            this.token = null;
+            this.authorizing = true;
+
+            this.getAuthorizationEndpoint(function (err, authorization_endpoint) {
+
+                var oauth_url = authorization_endpoint + '/oauth/authorize?' +
+                    'response_type=token&' +
+                    'client_id=' + encodeURIComponent(self.client_id) + '&' +
+                    'redirect_uri=' + encodeURIComponent(self.redirect_uri);
+
+                if (self.scopes) {
+                    oauth_url = oauth_url + '&scope=' + encodeURIComponent(self.scopes);
+                }
+
+                window.location = oauth_url;
+            });
+        };
+
+        api.prototype.authorizeNodejs = function (res, done) {
+
+            /**
+             * 1. If acting on behalf of a user e.g. just passing through a user token then a 401 is an error that should bubble out to the user
+             * 2. If acting as a resource server a 401 should trigger a refresh token attempt and failing that it should try to re-authenticate using client credentials
+             *
+             * Assume 1. for now until 2. is implemented. Users of this lib could override this function to patch in their desired behaviour.
+             */
+            if (done) {
+                done(new Error(makeErrorMessageFromResponse(res)), res);
+            }
+        };
+
+        api.prototype.triggerGlobalError = function (err, options, res) {
+            if (options.global) {
+                this.emit('http_error', err, res);
+            }
+        };
+
+        api.prototype.processResponse = function (options, err, res, done) {
+
+            if (err) {
+                this.triggerGlobalError(err, options, res);
+                return done(err, res);
+            }
+
+            if (res.status_code === 401 && !options.ignore_unauthorized && typeof window !== 'undefined') {return this.authorizeBrowser();}
+            if (res.status_code === 401 && !options.ignore_unauthorized && typeof window === 'undefined') {return this.authorizeNodejs(res, done);}
+
+            if (options.status_code && options.status_code !== res.status_code) {
+                this.triggerGlobalError(err, options, res);
+                return done(new Error(makeErrorMessageFromResponse(res)), res);
+            }
+
+            if (options.status_codes && options.status_codes.indexOf(res.status_code) === -1) {
+                this.triggerGlobalError(err, options, res);
+                return done(new Error(makeErrorMessageFromResponse(res)), res);
+            }
+
+            this.marshalResponse(options, res, done);
+        };
+
+        api.prototype.marshalResponse = function (options, res, done) {
+            /* this is effectively a no-op implementation. derived clients can use it to modify the response. */
+            var self = this;
+            setTimeout(function () {
+                done.call(self, null, res);
+            }, 1);
+        };
+
+        api.prototype.marshalRequest = function (url, options, done) {
+            /* this is effectively a no-op implementation. derived clients can use it to modify the request. */
+            var self = this;
+            setTimeout(function () {
+                done.call(self, null, url, options);
+            }, 1);
+        };
+
+        api.prototype.executeRequest = function (path, options, done) {
+
+            // Allow the special case where api components may need to talk to the UAA with it's own host.
+            var prepend_host = true;
+            if (path.indexOf('http') !== -1) {
+                prepend_host = false;
+            }
+
+            var self = this;
+            this.marshalRequest(path, options, function (err, path, options) {
+                if (err) {return done(err);}
+
+                self.http_client.request(
+                    (prepend_host ? self.api_endpoint : '') + path + (options.query ? options.query : ''),
+                    options,
+                    function (err, res) {
+                        self.processResponse(options, err, res, done);
+                    }
+                );
+            });
+        };
+
+        api.prototype.getApiInfo = function (done) {
+
+            this.get('/v2/info', {status_code: 200}, function (err, res) {
+                done(err, res ? res.body : null);
+            });
+        };
+
+        api.prototype.get = function (path, options, done) {
+
+            options = this.normalizeOptions(options);
+            options.verb = 'GET';
+
+            if (!options.status_code && !options.status_codes) {
+                options.status_code = 200;
+            }
+
+            this.executeRequest(path, options, done);
+        };
+
+        api.prototype.delete_ = function (path, options, done) {
+
+            options = this.normalizeOptions(options);
+            options.verb = 'DELETE';
+
+            if (!options.status_code && !options.status_codes) {
+                options.status_code = 200;
+            }
+
+            this.executeRequest(path, options, done);
+        };
+
+        api.prototype.put = function (path, options, done) {
+
+            options = this.normalizeOptions(options);
+            options.verb = 'PUT';
+
+            if (!options.status_code && !options.status_codes) {
+                options.status_code = 200;
+            }
+
+            this.executeRequest(path, options, done);
+        };
+
+        api.prototype.post = function (path, options, done) {
+
+            options = this.normalizeOptions(options);
+            options.verb = 'POST';
+
+            if (!options.status_code && !options.status_codes) {
+                options.status_code = 201;
+            }
+
+            this.executeRequest(path, options, done);
         };
 
         return api;

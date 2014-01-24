@@ -14,8 +14,21 @@ covering the entire Cloud Foundry Api but initially functionality will be added 
 ### Browser Dependencies
 
 * RequireJS (or AMD compatible loader)
-* jQuery
-* Underscore (or lodash)
+* jQuery (exported as 'jquery')
+* Underscore (exported as 'underscore')
+* Event Emitter (exported as 'event-emitter')
+
+Browser dependencies must be pulled in via your AMD loader e.g. if using requirejs you would configure your paths as:
+
+```
+paths:{
+    jquery: 'cloud-foundry-client/vendor/jquery/jquery-1.10.1.min',
+    underscore: 'cloud-foundry-client/vendor/underscore/underscore-1.4.4.min',
+    'event-emitter': 'cloud-foundry-client/vendor/event-emitter/event-emitter.4.0.3.min',
+}
+```
+
+You may point these paths at your own copies of the dependencies if you're already using them elsewhere in your project.
 
 Browser dependencies are bundled in the ```/vendor``` directory.
 
