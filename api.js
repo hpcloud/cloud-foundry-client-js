@@ -77,6 +77,7 @@ define([
 
                 options = options || {};
                 options.headers = options.headers || {};
+                options.global = typeof options.global === 'undefined' ? true : options.global;
 
                 if (this.token) {
                     this.addAuthorizationHeaderToOptions(options);
@@ -145,12 +146,29 @@ define([
                 }
             },
 
+            triggerGlobalError: function (err, options, res) {
+
+                if (options.global) {
+                    // TODO trigger global err event
+                }
+            },
+
             processResponse: function (options, err, res, done) {
+
                 if (err) {return done(err, res);}
                 if (res.status_code === 401 && !options.ignore_unauthorized && typeof window !== 'undefined') {return this.authorizeBrowser();}
                 if (res.status_code === 401 && !options.ignore_unauthorized && typeof window === 'undefined') {return this.authorizeNodejs(res, done);}
-                if (options.status_code && options.status_code !== res.status_code) {return done(new Error(makeErrorMessageFromResponse(res)), res);}
-                if (options.status_codes && options.status_codes.indexOf(res.status_code) === -1) {return done(new Error(makeErrorMessageFromResponse(res)), res);}
+
+                if (options.status_code && options.status_code !== res.status_code) {
+                    this.triggerGlobalError();
+                    return done(new Error(makeErrorMessageFromResponse(res)), res);
+                }
+
+                if (options.status_codes && options.status_codes.indexOf(res.status_code) === -1) {
+                    this.triggerGlobalError();
+                    return done(new Error(makeErrorMessageFromResponse(res)), res);
+                }
+
                 this.marshalResponse(options, res, done);
             },
 
