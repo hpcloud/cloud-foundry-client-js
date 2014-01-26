@@ -15,10 +15,12 @@ define([
     './lib/users',
     './lib/organizations',
     './lib/domains',
+    './lib/shared-domains',
+    './lib/private-domains',
     './lib/routes',
     './lib/quota-definitions',
     './lib/http-client'],
-    function (Events, Apps, Services, ServiceInstances, ServicePlans, ServiceBindings, Spaces, Users, Organizations, Domains, Routes, QuotaDefinitions, HttpClient) {
+    function (Events, Apps, Services, ServiceInstances, ServicePlans, ServiceBindings, Spaces, Users, Organizations, Domains, SharedDomains, PrivateDomains, Routes, QuotaDefinitions, HttpClient) {
 
         var api = function (api_endpoint, options) {
 
@@ -40,6 +42,8 @@ define([
             this.spaces = new Spaces(this);
             this.organizations = new Organizations(this);
             this.domains = new Domains(this);
+            this.shared_domains = new SharedDomains(this);
+            this.private_domains = new PrivateDomains(this);
             this.routes = new Routes(this);
             this.quota_definitions = new QuotaDefinitions(this);
 
