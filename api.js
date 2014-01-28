@@ -70,6 +70,14 @@ define([
             return 'Status: ' + res.status_code + '. Response: ' + response_body;
         };
 
+        var makeResponseError = function (err, res) {
+            if (!err) {
+                err = new Error(makeErrorMessageFromResponse(res));
+            }
+            err.status_code = res ? res.status_code : 0;
+            return err;
+        };
+
         api.prototype.initialize = function () {
             /* faux-constructor to use as an extension point for derived clients */
         };
@@ -164,6 +172,7 @@ define([
         api.prototype.processResponse = function (options, err, res, done) {
 
             if (err) {
+                err = makeResponseError(err, res);
                 this.triggerGlobalError(err, options, res);
                 return done(err, res);
             }
@@ -171,14 +180,11 @@ define([
             if (res.status_code === 401 && !options.ignore_unauthorized && typeof window !== 'undefined') {return this.authorizeBrowser();}
             if (res.status_code === 401 && !options.ignore_unauthorized && typeof window === 'undefined') {return this.authorizeNodejs(res, done);}
 
-            if (options.status_code && options.status_code !== res.status_code) {
-                this.triggerGlobalError(err, options, res);
-                return done(new Error(makeErrorMessageFromResponse(res)), res);
-            }
-
-            if (options.status_codes && options.status_codes.indexOf(res.status_code) === -1) {
-                this.triggerGlobalError(err, options, res);
-                return done(new Error(makeErrorMessageFromResponse(res)), res);
+            if ((options.status_code && options.status_code !== res.status_code) ||
+                (options.status_codes && options.status_codes.indexOf(res.status_code) === -1)) {
+                var error = makeResponseError(null, res);
+                this.triggerGlobalError(error, options, res);
+                return done(error, res);
             }
 
             this.marshalResponse(options, res, done);
