@@ -228,9 +228,17 @@ define([
             });
         };
 
-        api.prototype.getApiInfo = function (done) {
+        api.prototype.getApiInfo = function (options, done) {
 
-            this.get('/v2/info', {status_code: 200}, function (err, res) {
+             if (typeof options === 'function' && typeof done === 'undefined') {
+                done = options;
+                options = null;
+            }
+
+            options = options || {};
+            options.status_code = 200;
+
+            this.get('/v2/info', options, function (err, res) {
                 done(err, res ? res.body : null);
             });
         };
