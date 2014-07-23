@@ -5,22 +5,22 @@
 if (typeof define !== 'function') { var define = require('amdefine')(module) }
 
 define([
-    typeof window === 'undefined' ? 'events' : 'event-emitter',
-    './lib/apps',
-    './lib/services',
-    './lib/service-instances',
-    './lib/user-provided-service-instances',
-    './lib/service-plans',
-    './lib/service-bindings',
-    './lib/spaces',
-    './lib/users',
-    './lib/organizations',
-    './lib/domains',
-    './lib/shared-domains',
-    './lib/private-domains',
-    './lib/routes',
-    './lib/quota-definitions',
-    './lib/http-client'],
+            typeof window === 'undefined' ? 'events' : 'event-emitter',
+        './lib/apps',
+        './lib/services',
+        './lib/service-instances',
+        './lib/user-provided-service-instances',
+        './lib/service-plans',
+        './lib/service-bindings',
+        './lib/spaces',
+        './lib/users',
+        './lib/organizations',
+        './lib/domains',
+        './lib/shared-domains',
+        './lib/private-domains',
+        './lib/routes',
+        './lib/quota-definitions',
+        './lib/http-client'],
     function (Events, Apps, Services, ServiceInstances, UserProvidedServiceInstances, ServicePlans, ServiceBindings, Spaces, Users, Organizations, Domains, SharedDomains, PrivateDomains, Routes, QuotaDefinitions, HttpClient) {
 
         var api = function (api_endpoint, options) {
@@ -29,7 +29,7 @@ define([
 
             this.api_endpoint = api_endpoint;
             this.authorization_endpoint = options.authorization_endpoint || null;
-            this.http_client = new HttpClient();
+            this.http_client = new HttpClient(options);
             this.token = options.token || null;
             this.scopes = options.scopes || null;
             this.redirect_uri = options.redirect_uri || null;
@@ -221,7 +221,7 @@ define([
                 if (err) {return done(err);}
 
                 self.http_client.request(
-                    (prepend_host ? self.api_endpoint : '') + path + (options.query ? options.query : ''),
+                        (prepend_host ? self.api_endpoint : '') + path + (options.query ? options.query : ''),
                     options,
                     function (err, res) {
                         self.processResponse(options, err, res, done);
@@ -232,7 +232,7 @@ define([
 
         api.prototype.getApiInfo = function (options, done) {
 
-             if (typeof options === 'function' && typeof done === 'undefined') {
+            if (typeof options === 'function' && typeof done === 'undefined') {
                 done = options;
                 options = null;
             }
