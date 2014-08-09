@@ -4,24 +4,30 @@
 
 if (typeof define !== 'function') { var define = require('amdefine')(module) }
 
-define([
-            typeof window === 'undefined' ? 'events' : 'event-emitter',
+define([typeof window === 'undefined' ? 'events' : 'event-emitter',
+        './lib/collection',
         './lib/apps',
-        './lib/services',
-        './lib/service-instances',
-        './lib/user-provided-service-instances',
-        './lib/service-plans',
-        './lib/service-bindings',
         './lib/spaces',
         './lib/users',
         './lib/organizations',
-        './lib/domains',
-        './lib/shared-domains',
-        './lib/private-domains',
-        './lib/routes',
-        './lib/quota-definitions',
         './lib/http-client'],
-    function (Events, Apps, Services, ServiceInstances, UserProvidedServiceInstances, ServicePlans, ServiceBindings, Spaces, Users, Organizations, Domains, SharedDomains, PrivateDomains, Routes, QuotaDefinitions, HttpClient) {
+    function (Events, Collection, Apps, Spaces, Users, Organizations, HttpClient) {
+
+        /*
+         Generic CF resources that follow the standard pattern with no unique functionality.
+         For other resources that do have unique functionality derive an object off of collection and add specific functions.
+         */
+        var generic_collections = [
+            'domains',
+            'private_domains',
+            'shared_domains',
+            'quota_definitions',
+            'routes',
+            'service_bindings',
+            'service_plans',
+            'services',
+            'service_instances',
+            'user_provided_service_instances'];
 
         var api = function (api_endpoint, options) {
 
@@ -36,19 +42,10 @@ define([
             this.client_id = options.client_id || 'cf';
             this.apps = new Apps(this);
             this.users = new Users(this);
-            this.services = new Services(this);
-            this.service_instances = new ServiceInstances(this);
-            this.user_provided_service_instances = new UserProvidedServiceInstances(this);
-            this.service_plans = new ServicePlans(this);
-            this.service_bindings = new ServiceBindings(this);
             this.spaces = new Spaces(this);
             this.organizations = new Organizations(this);
-            this.domains = new Domains(this);
-            this.shared_domains = new SharedDomains(this);
-            this.private_domains = new PrivateDomains(this);
-            this.routes = new Routes(this);
-            this.quota_definitions = new QuotaDefinitions(this);
 
+            this.initializeGenericCollections();
             this.initialize();
         };
 
@@ -82,6 +79,18 @@ define([
 
         api.prototype.initialize = function () {
             /* faux-constructor to use as an extension point for derived clients */
+        };
+
+        api.prototype.initializeGenericCollections = function () {
+
+            var self = this;
+
+            generic_collections.forEach(function (collection_name) {
+                var collection = new Collection();
+                collection.collection = collection_name;
+                collection.api = self;
+                self[collection_name] = collection;
+            });
         };
 
         api.prototype.makeAuthorizationHeader = function () {
