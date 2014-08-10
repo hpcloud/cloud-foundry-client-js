@@ -8,10 +8,13 @@ define([typeof window === 'undefined' ? 'events' : 'event-emitter',
         './lib/collection',
         './lib/apps',
         './lib/spaces',
+        './lib/events',
+        './lib/app-usage-events',
+        './lib/feature-flags',
         './lib/users',
         './lib/organizations',
         './lib/http-client'],
-    function (Events, Collection, Apps, Spaces, Users, Organizations, HttpClient) {
+    function (EventEmitter, Collection, Apps, Spaces, Events, AppUsageEvents, FeatureFlags, Users, Organizations, HttpClient) {
 
         /*
          Generic CF resources that follow the standard pattern with no unique functionality.
@@ -27,7 +30,8 @@ define([typeof window === 'undefined' ? 'events' : 'event-emitter',
             'service_plans',
             'services',
             'service_instances',
-            'user_provided_service_instances'];
+            'user_provided_service_instances',
+            'buildpacks'];
 
         var api = function (api_endpoint, options) {
 
@@ -41,6 +45,9 @@ define([typeof window === 'undefined' ? 'events' : 'event-emitter',
             this.redirect_uri = options.redirect_uri || null;
             this.client_id = options.client_id || 'cf';
             this.apps = new Apps(this);
+            this.events = new Events(this);
+            this.app_usage_events = new AppUsageEvents(this);
+            this.feature_flags = new FeatureFlags(this);
             this.users = new Users(this);
             this.spaces = new Spaces(this);
             this.organizations = new Organizations(this);
@@ -50,9 +57,9 @@ define([typeof window === 'undefined' ? 'events' : 'event-emitter',
         };
 
         if (typeof window === 'undefined') {
-            api.prototype.__proto__ = Events.EventEmitter.prototype;
+            api.prototype.__proto__ = EventEmitter.EventEmitter.prototype;
         } else {
-            api.prototype = Object.create(new Events());
+            api.prototype = Object.create(new EventEmitter());
         }
 
         var makeErrorMessageFromResponse = function (res) {
