@@ -8,24 +8,26 @@ define([typeof window === 'undefined' ? 'events' : 'event-emitter',
         './lib/collection',
         './lib/apps',
         './lib/spaces',
+        './lib/routes',
         './lib/events',
         './lib/app-usage-events',
         './lib/feature-flags',
+        './lib/jobs',
         './lib/users',
         './lib/organizations',
         './lib/http-client'],
-    function (EventEmitter, Collection, Apps, Spaces, Events, AppUsageEvents, FeatureFlags, Users, Organizations, HttpClient) {
+    function (EventEmitter, Collection, Apps, Spaces, Routes, Events, AppUsageEvents, FeatureFlags, Jobs, Users, Organizations, HttpClient) {
 
         /*
          Generic CF resources that follow the standard pattern with no unique functionality.
-         For other resources that do have unique functionality derive an object off of collection and add specific functions.
+         For other resources that do have unique functionality or don't support the standard set of verbs then derive an
+         object off of collection and add or remove specific functions.
          */
         var generic_collections = [
             'domains',
             'private_domains',
             'shared_domains',
             'quota_definitions',
-            'routes',
             'service_bindings',
             'service_plans',
             'services',
@@ -48,8 +50,10 @@ define([typeof window === 'undefined' ? 'events' : 'event-emitter',
             this.events = new Events(this);
             this.app_usage_events = new AppUsageEvents(this);
             this.feature_flags = new FeatureFlags(this);
+            this.jobs = new Jobs(this);
             this.users = new Users(this);
             this.spaces = new Spaces(this);
+            this.routes = new Routes(this);
             this.organizations = new Organizations(this);
 
             this.initializeGenericCollections();
@@ -91,7 +95,6 @@ define([typeof window === 'undefined' ? 'events' : 'event-emitter',
         api.prototype.initializeGenericCollections = function () {
 
             var self = this;
-
             generic_collections.forEach(function (collection_name) {
                 var collection = new Collection();
                 collection.collection = collection_name;
