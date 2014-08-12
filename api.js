@@ -43,6 +43,8 @@ define([typeof window === 'undefined' ? 'events' : 'event-emitter',
             this.authorization_endpoint = options.authorization_endpoint || null;
             this.http_client = new HttpClient(options);
             this.token = options.token || null;
+            this.user_name = options.user_name || null;
+            this.password = options.password || null;
             this.scopes = options.scopes || null;
             this.redirect_uri = options.redirect_uri || null;
             this.client_id = options.client_id || 'cf';
@@ -171,15 +173,43 @@ define([typeof window === 'undefined' ? 'events' : 'event-emitter',
             });
         };
 
-        api.prototype.authorizeNodejs = function (res, done) {
+        api.prototype.authenticateUser = function (done) {
+          var self = this;
+          self.authorizing = true;
+          this.getAuthorizationEndpoint(function (err, authorization_endpoint) {
+           console.log('need to authenticate here with '+ authorization_endpoint+ '/oauth/token');
+           var urlParameters = 'grant_type=password&password='+ self.password +'&username=' + encodeURIComponent(self.user_name);
+           var authenticationOptions =  {
+             query : urlParameters,
+             status_code: 200,
+             headers : {
+              'Authorization'  : 'basic Y2Y6'
+            }};
 
+            return self.post(authorization_endpoint + '/oauth/token?', authenticationOptions, function(err, res){
+              if(res.body.access_token) {
+                self.token = res.body.access_token;
+                this.authorizing = false;
+              }
+              done(null, null);
+            });
+         });
+        };
+
+        api.prototype.authorizeNodejs = function (res, done) {
             /**
              * 1. If acting on behalf of a user e.g. just passing through a user token then a 401 is an error that should bubble out to the user
              * 2. If acting as a resource server a 401 should trigger a refresh token attempt and failing that it should try to re-authenticate using client credentials
              *
              * Assume 1. for now until 2. is implemented. Users of this lib could override this function to patch in their desired behaviour.
              */
-            if (done) {
+             if(this.authorizing)
+               return;
+
+            if(this.user_name && this.password) {
+                this.authenticateUser(done);
+             }
+            else if (done) {
                 done(new Error(makeErrorMessageFromResponse(res)), res);
             }
         };
@@ -238,11 +268,11 @@ define([typeof window === 'undefined' ? 'events' : 'event-emitter',
             var self = this;
             this.marshalRequest(path, options, function (err, path, options) {
                 if (err) {return done(err);}
-
                 self.http_client.request(
                         (prepend_host ? self.api_endpoint : '') + path + (options.query ? options.query : ''),
                     options,
                     function (err, res) {
+
                         self.processResponse(options, err, res, done);
                     }
                 );
