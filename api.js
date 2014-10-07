@@ -8,6 +8,7 @@ define([typeof window === 'undefined' ? 'events' : 'event-emitter',
         './lib/collection',
         './lib/apps',
         './lib/spaces',
+        './lib/space-quota-definitions',
         './lib/routes',
         './lib/events',
         './lib/app-usage-events',
@@ -16,7 +17,7 @@ define([typeof window === 'undefined' ? 'events' : 'event-emitter',
         './lib/users',
         './lib/organizations',
         './lib/http-client'],
-    function (EventEmitter, Collection, Apps, Spaces, Routes, Events, AppUsageEvents, FeatureFlags, Jobs, Users, Organizations, HttpClient) {
+    function (EventEmitter, Collection, Apps, Spaces, SpaceQuotaDefinitions, Routes, Events, AppUsageEvents, FeatureFlags, Jobs, Users, Organizations, HttpClient) {
 
         /*
          Generic CF resources that follow the standard pattern with no unique functionality.
@@ -53,6 +54,7 @@ define([typeof window === 'undefined' ? 'events' : 'event-emitter',
             this.jobs = new Jobs(this);
             this.users = new Users(this);
             this.spaces = new Spaces(this);
+            this.space_quota_definitions = new SpaceQuotaDefinitions(this);
             this.routes = new Routes(this);
             this.organizations = new Organizations(this);
 
