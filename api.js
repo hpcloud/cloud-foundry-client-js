@@ -1,5 +1,5 @@
 /**
- * Copyright (c) ActiveState 2013 - ALL RIGHTS RESERVED.
+ * Copyright (c) ActiveState 2014 - ALL RIGHTS RESERVED.
  */
 
 if (typeof define !== 'function') { var define = require('amdefine')(module) }
@@ -42,6 +42,7 @@ define([typeof window === 'undefined' ? 'events' : 'event-emitter',
 
             this.api_endpoint = api_endpoint;
             this.authorization_endpoint = options.authorization_endpoint || null;
+            this.use_authorization_header = options.use_authorization_header || true;
             this.http_client = new HttpClient(options);
             this.token = options.token || null;
             this.scopes = options.scopes || null;
@@ -119,7 +120,7 @@ define([typeof window === 'undefined' ? 'events' : 'event-emitter',
             options.headers = options.headers || {};
             options.global = typeof options.global === 'undefined' ? true : options.global;
 
-            if (this.token) {
+            if (this.token && options.use_authorization_header) {
                 this.addAuthorizationHeaderToOptions(options);
             }
 
