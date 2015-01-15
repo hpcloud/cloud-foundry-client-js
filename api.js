@@ -1,5 +1,5 @@
 /**
- * Copyright (c) ActiveState 2014 - ALL RIGHTS RESERVED.
+ * Copyright (c) ActiveState 2015 - ALL RIGHTS RESERVED.
  */
 
 if (typeof define !== 'function') { var define = require('amdefine')(module) }
