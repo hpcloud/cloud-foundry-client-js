@@ -47,6 +47,7 @@ define([typeof window === 'undefined' ? 'events' : 'event-emitter',
             this.scopes = options.scopes || null;
             this.redirect_uri = options.redirect_uri || null;
             this.client_id = options.client_id || 'cf';
+            this.response_type = options.response_type || 'token';
             this.apps = new Apps(this);
             this.events = new Events(this);
             this.app_usage_events = new AppUsageEvents(this);
@@ -158,19 +159,26 @@ define([typeof window === 'undefined' ? 'events' : 'event-emitter',
             this.token = null;
             this.authorizing = true;
 
-            this.getAuthorizationEndpoint(function (err, authorization_endpoint) {
+            // If response_type is 'code' then assume redirect_uri points to a backend that will handle the authorization
+            // grant OAuth2 flow on behalf of the browser client. Typically used to avoid exposing the OAuth2 token to
+            // the browser (e.g. backend will issue a session cookie etc. instead of raw token).
+            if (this.response_type === 'code') {
+                window.location = this.redirect_uri;
+            } else {
+                this.getAuthorizationEndpoint(function (err, authorization_endpoint) {
 
-                var oauth_url = authorization_endpoint + '/oauth/authorize?' +
-                    'response_type=token&' +
-                    'client_id=' + encodeURIComponent(self.client_id) + '&' +
-                    'redirect_uri=' + encodeURIComponent(self.redirect_uri);
+                    var oauth_url = authorization_endpoint + '/oauth/authorize?' +
+                        'response_type=' + encodeURIComponent(self.response_type) + '&' +
+                        'client_id=' + encodeURIComponent(self.client_id) + '&' +
+                        'redirect_uri=' + encodeURIComponent(self.redirect_uri);
 
-                if (self.scopes) {
-                    oauth_url = oauth_url + '&scope=' + encodeURIComponent(self.scopes);
-                }
+                    if (self.scopes) {
+                        oauth_url = oauth_url + '&scope=' + encodeURIComponent(self.scopes);
+                    }
 
-                window.location = oauth_url;
-            });
+                    window.location = oauth_url;
+                });
+            }
         };
 
         api.prototype.authorizeNodejs = function (res, done) {
@@ -242,7 +250,7 @@ define([typeof window === 'undefined' ? 'events' : 'event-emitter',
                 if (err) {return done(err);}
 
                 self.http_client.request(
-                        (prepend_host ? self.api_endpoint : '') + path + (options.query ? options.query : ''),
+                    (prepend_host ? self.api_endpoint : '') + path + (options.query ? options.query : ''),
                     options,
                     function (err, res) {
                         self.processResponse(options, err, res, done);
