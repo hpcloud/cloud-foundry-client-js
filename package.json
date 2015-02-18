@@ -17,7 +17,9 @@
     "dependencies": {
         "amdefine": ">=0.1.0",
         "underscore": "1.5.2",
-        "request": "2.30.0",
+        "request": "2.30.0"
+    },
+    "devDependencies": {
         "mocha": "1.16.2",
         "expect.js": "0.2.0"
     },
@@ -29,3 +31,4 @@
         "node": ">=0.4.2"
     }
 }
+
